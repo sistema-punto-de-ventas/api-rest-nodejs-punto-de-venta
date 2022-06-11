@@ -1,0 +1,47 @@
+{
+  "name": "api-rest-node-restaurante-remember",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "start2": "nodemon app.js"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "config/configApi.json"
+    ]
+  },
+  "bin": "app.js",
+  "pkg": {
+    "scripts": "build/**/*.js",
+    "assets": [
+      "public/**/*",
+      "file/**/*"
+    ],
+    "target": "node8"
+  },
+  "author": "GonzaloEspinoza",
+  "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "^2.1104.0",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "fs-extra": "^10.0.0",
+    "jwt-simple": "^0.5.6",
+    "moment": "^2.29.1",
+    "mongoose": "^6.0.12",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.3",
+    "network": "^0.6.1",
+    "node-cron": "^3.0.0",
+    "node-windows": "^1.0.0-beta.6",
+    "sha1": "^1.1.1",
+    "socket.io": "^4.4.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.14",
+    "nw-builder": "^3.5.7"
+  }
+}
