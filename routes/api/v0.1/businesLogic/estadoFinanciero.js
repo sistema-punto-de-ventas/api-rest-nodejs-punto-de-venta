@@ -12,6 +12,7 @@ const { pvendido } = require('../../../../database/collection/models/venta');
 const {producto} = require('../../../../database/collection/models/producto');
 const { redondearPrecio } = require('../../../../Utils/RedondeNumeros/redondeoPrecios');
 const Redonde = require("../../../../Utils/RedondeNumeros/redondeoPrecios");
+const Redondear = require("../../../../Utils/RedondeNumeros/redondearNumeros");
 
 class EstadoFinanciero {
 
@@ -260,17 +261,17 @@ class EstadoFinanciero {
             result: {
                 _id: getListVentas.result._id,
                 montoInicial: getListVentas.result.montoInicial,
-                montoCierreCaja: getListVentas.result.montoCierreCaja,
-                montoActualDisponble: getListVentas.result.montoActualDisponble,
-                montoTotal: getListVentas.result.montoTotal,
-                montoActualUtilizado: getListVentas.result.montoActualUtilizado,
+                montoCierreCaja: await Redondear.redondearMonto(getListVentas.result.montoCierreCaja),
+                montoActualDisponble: await Redondear.redondearMonto(getListVentas.result.montoActualDisponble),
+                montoTotal: await Redondear.redondearMonto(getListVentas.result.montoTotal),
+                montoActualUtilizado: await Redondear.redondearMonto(getListVentas.result.montoActualUtilizado),
                 dateCreated: getListVentas.result.dateCreated,
                 cantidadVendido: getListVentas.result.listVentas.length,
                 cantidadDeGastos: getListGastos.result.listGastos.length,
                 ventas: {
-                    sumEfectivoTotal,
-                    sumCambio,
-                    total,
+                    sumEfectivoTotal:await  Redondear.redondearMonto(sumEfectivoTotal),
+                    sumCambio:await Redondear.redondearMonto(sumCambio),
+                    total: await Redondear.redondearMonto(total),
                 },
                 totalGastos,
                 listVentas: paginationVentas,
@@ -497,18 +498,24 @@ class EstadoFinanciero {
 
         const arrListVentas = await paginationListVentas({ arrVentas, pagenumber, pagesize, buscador })
 
-        return res.status(200).json({
+        var sumEfectivoT =await  Redondear.redondearMonto(sumEfectivoTotal);
+        var sumC =await  Redondear.redondearMonto(sumCambio);
+        var totalR =await  Redondear.redondearMonto(total);
+
+        return res.status(200).json(
+            {
             status: 'ok',
             message: 'Lista de ventas del estado financiero',
             result: {
                 ventas: {
-                    sumEfectivoTotal,
-                    sumCambio,
-                    total,
+                    sumEfectivoTotal:sumEfectivoT,
+                    sumCambio:sumC,
+                    total:totalR,
                 },
                 listVentas: arrListVentas,
             }
-        })
+        }
+        )
     }
     //sacar los gaastos del estado financiero activo filtrado tmb por user
     static async getGastosEstadoFinacieroActivo(req, res) {

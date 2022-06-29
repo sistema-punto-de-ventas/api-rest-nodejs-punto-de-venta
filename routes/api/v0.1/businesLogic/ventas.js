@@ -14,6 +14,7 @@ const moment = require('moment');
 const Verify = require('../../../../Utils/verifyCampos/verifyCampos');
 const socketControllers = require('../../../../socket/controllers/socketControllers');
 const { default: CallTickets } = require('./callTickets');
+const Redondear = require('../../../../Utils/RedondeNumeros/redondearNumeros');
 
 
 class Ventas {
@@ -275,10 +276,10 @@ class Ventas {
             status: 'ok',
             message: 'Reporte de ventas y gastos',
             Fecha: `del ${fechaInicio} hasta ${fechaFinal}`,
-            montoInicial: montoInicial.montoInicial,
-            totalVentas: getVentaNegocio.totalVentas,
-            gasatoTotal: getGastosNegocio.totalGastos,
-            total: (getVentaNegocio.totalVentas - getGastosNegocio.totalGastos) + montoInicial.montoInicial,
+            montoInicial: await Redondear.redondearMonto(montoInicial.montoInicial),
+            totalVentas: await Redondear.redondearMonto(getVentaNegocio.totalVentas),
+            gasatoTotal: await Redondear.redondearMonto(getGastosNegocio.totalGastos),
+            total: await Redondear.redondearMonto((getVentaNegocio.totalVentas - getGastosNegocio.totalGastos) + montoInicial.montoInicial),
             cantidadVendido: getVentaNegocio.cantidadVendido,
             gastosLength: getGastosNegocio.gastosLength,
             productVendido: paginationVentas,

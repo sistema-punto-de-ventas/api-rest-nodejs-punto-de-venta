@@ -5,6 +5,8 @@ const NegocioSchema = require('../../../../../database/collection/models/negocio
 const { user } = require('../../../../../database/collection/models/user');
 const { cliente } = require('../../../../../database/collection/models/clientes');
 const { updateEstadoFinanciero } = require('../estadoFinanciero');
+const Redondear = require('../../../../../Utils/RedondeNumeros/redondearNumeros');
+const estadoFinancieroSchema = require('../../../../../database/collection/models/estadoFinanciero');
 
 class UtilsVentas {
 
@@ -56,22 +58,23 @@ class UtilsVentas {
             const DataResult = await createPventas(ArrayListProducts);
             const dataNegocio = await NegocioSchema.negocio.findById({ _id: idNegocio });//falta control de esto
             const dataVenta = await VentaSchema.Venta.find({ idNegocio: idNegocio });
+            const EstadoFinanciero = await estadoFinancieroSchema.estadoFinanciero.findOne({ idNegocio: idNegocio, state: true });
 
-            var newVenta = new VentaSchema.Venta({
+            var newVenta = await new VentaSchema.Venta({
                 idNegocio: dataNegocio._id,
                 idUser: idUser,
                 idCLiente: cliente,
                 nit: dataNegocio.nit,
-                venta: dataVenta.length + 1,
-                subtotal: DataResult.precioTotalBackend,
+                venta: EstadoFinanciero.listVentas.length?EstadoFinanciero.listVentas.length+1:1,
+                subtotal: await Redondear.redondearMonto(DataResult.precioTotalBackend),
                 precioTotal: precioTotal,
-                precioTotalBackend: DataResult.precioTotalBackend -  DataResult.totalDescuento,
-                totalDescuento: DataResult.totalDescuento,
+                precioTotalBackend:await Redondear.redondearMonto( DataResult.precioTotalBackend -  DataResult.totalDescuento),
+                totalDescuento: await Redondear.redondearMonto(DataResult.totalDescuento),
                 products: DataResult.listPventas,
                 state: 'Cancelado',
                 tipoDePago: 'efectivo',
                 pagoCliente: pagoCliente,
-                cambioCliente: cambioCliente,
+                cambioCliente:  await Redondear.redondearMonto(cambioCliente),
                 descuento: descuento?descuento:0,
                 notaVenta: []
             })
@@ -150,8 +153,8 @@ const createPventas = async (ArrayListProducts) => {
                 precioCosto: dataProduct.precioCosto ? dataProduct.precioCosto : 0,
                 descuentoUnidad: ArrayListProducts[i].descuentoUnidad ? ArrayListProducts[i].descuentoUnidad : 0,
 
-                subTotal: dataProduct.precioUnitario * ArrayListProducts[i].unidadesVendidos,
-                total: (dataProduct.precioUnitario * ArrayListProducts[i].unidadesVendidos) - (ArrayListProducts[i].descuentoUnidad * ArrayListProducts[i].unidadesVendidos),
+                subTotal:  await Redondear.redondearMonto(dataProduct.precioUnitario * ArrayListProducts[i].unidadesVendidos),
+                total:  await Redondear.redondearMonto((dataProduct.precioUnitario * ArrayListProducts[i].unidadesVendidos) - (ArrayListProducts[i].descuentoUnidad * ArrayListProducts[i].unidadesVendidos)),
                 envioDesde: dataProduct.envioDesde ? dataProduct.envioDesde : 'no asignado',
                 costoEnvio: dataProduct.costoEnvio ? dataProduct.costoEnvio : 0,
                 estadoProduct: dataProduct.estadoProduct ? dataProduct.estadoProduct : 'no asignado',
