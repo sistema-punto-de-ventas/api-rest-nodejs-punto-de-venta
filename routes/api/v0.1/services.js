@@ -159,9 +159,9 @@ route.get('/venta/listVentasRange/:idNegocio/:fechaInicio/:fechaFinal', Ventas.g
 route.get('/venta/list/states/stateOrdenRestaurante=:stateOrdenRestaurante?',Ventas.getStateVentas);
 route.post('/venta/update/stateOrdenRestaurante',Ventas.setStateOrdenRestaurante);
 route.get('/venta/list/products/idVenta=:idVenta',Ventas.getListProductsVentas);
-    //para ver el numero de ticket
+//para ver el numero de ticket
 route.get('/venta/numero/ticket/idNegocio=:idNegocio',Ventas.getNumeroTicket)
-    // call tickets
+// call tickets
 route.get('/venta/calltickets/stateOrdenRestaurante=:stateOrdenRestaurante?',CallTickets.dataVentasToCallTickets)
 
 
@@ -177,7 +177,7 @@ route.post('/products/add/:idNegocio/:idUser', Products.addNewProduct);
 route.get('/products/get/list/:idNegocio', Products.getAllProducts);
 route.put('/products/update/:idProducto',[Auth, AccessRoleControl.isCocinero], Products.updateProducto);
 route.delete('/products/delete', Products.deleteProduct);
-   // search products
+// search products
 route.post('/products/search/idNegocio=:idNegocio/nameSearch=:nameSearch?',Products.searchProducts)
 
 /* =======================salas=============================== */
@@ -198,7 +198,7 @@ route.post('/pcategoria/add/idNegocio=:idNegocio/idUser=:idUser', PCategorias.ad
 route.put('/pcategoria/update/idPcategoria=:idPcategoria', PCategorias.updatePcategoria);
 route.get('/pcategoria/detail/idPcategoria=:idPcategoria', PCategorias.getDetailPcategoria);
 route.get('/pcategoria/getlist/idNegocio=:idNegocio', PCategorias.getAllCategoria);
-  // =======subcategorias============
+// =======subcategorias============
 route.post('/psubcategoria/add/idPcategoria=:idPcategoria/idUser=:idUser',PCategorias.addSubCategoria);
 route.put('/psubcategoria/update/idPsubcategoria=:idPsubcategoria', PCategorias.updatePsubcategoria);
 
@@ -240,6 +240,7 @@ route.get('/ordenes/listOrdenesCaja/:idRestaurant',Ordenes.listOrdenesCaja);
 //actualizar la orden a cancelado
 route.put('/ordenes/updateOrdenCancelado/:idOrden', Ordenes.updateOrdenCancelado);
 
+// here
 
 
 //para el cocinero 

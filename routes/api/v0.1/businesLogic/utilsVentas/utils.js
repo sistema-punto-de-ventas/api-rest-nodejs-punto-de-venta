@@ -8,6 +8,11 @@ const { updateEstadoFinanciero } = require('../estadoFinanciero');
 const Redondear = require('../../../../../Utils/RedondeNumeros/redondearNumeros');
 const estadoFinancieroSchema = require('../../../../../database/collection/models/estadoFinanciero');
 
+// liberia a mathjs
+const {create, all} = require('mathjs');
+const config={};
+const math = create(all, config);
+
 class UtilsVentas {
 
     // verifica los campos requeridos de cada producto vendido
@@ -135,12 +140,24 @@ const createPventas = async (ArrayListProducts) => {
             var cantidadProducto = await dataProduct.unidadesDisponibles;
             
             if(cantidadProducto!=undefined && cantidadProducto!="" && cantidadProducto>0){
-                cantidadProducto = cantidadProducto - ArrayListProducts[i].unidadesVendidos;
+                // cantidadProducto = cantidadProducto - ArrayListProducts[i].unidadesVendidos;
+                var unidadesVendidos = ArrayListProducts[i].unidadesVendidos;
+                cantidadProducto = await math.subtract(cantidadProducto, unidadesVendidos);
+                // cantidadProducto = cantidadProducto - ArrayListProducts[i].unidadesVendidos;
+
                 await productSchema.producto.updateOne({ _id: dataProduct._id }, { unidadesDisponibles: cantidadProducto });
             }
 
-            subTotal =await subTotal + dataProduct.precioUnitario * ArrayListProducts[i].unidadesVendidos;
-            descuentoTotal = await descuentoTotal + (ArrayListProducts[i].descuentoUnidad * ArrayListProducts[i].unidadesVendidos);
+            var precioUnitario = dataProduct.precioUnitario;
+            var unidadesVendi = ArrayListProducts[i].unidadesVendidos;
+            var descuentoPorCompra = await math.multiply(precioUnitario,unidadesVendi);
+            // subTotal =await subTotal + dataProduct.precioUnitario * ArrayListProducts[i].unidadesVendidos;
+            subTotal = await math.sum(subTotal,descuentoPorCompra);
+            var descuentoUnidd = ArrayListProducts[i].descuentoUnidad;
+            var descuentoT = math.multiply(descuentoUnidd,unidadesVendi);
+            // descuentoTotal = await descuentoTotal + (ArrayListProducts[i].descuentoUnidad * ArrayListProducts[i].unidadesVendidos);
+            descuentoTotal = await math.sum(descuentoTotal,descuentoT)
+
             var newPvendido = new VentaSchema.pvendido({
                 idNegocio: dataProduct.idNegocio ? dataProduct.idNegocio : 'no asingando',
                 idProduct: dataProduct._id ? dataProduct._id : 'no asingando',
@@ -152,6 +169,7 @@ const createPventas = async (ArrayListProducts) => {
                 precioUnitario: dataProduct.precioUnitario ? dataProduct.precioUnitario : 0,
                 precioCosto: dataProduct.precioCosto ? dataProduct.precioCosto : 0,
                 descuentoUnidad: ArrayListProducts[i].descuentoUnidad ? ArrayListProducts[i].descuentoUnidad : 0,
+
 
                 subTotal:  await Redondear.redondearMonto(dataProduct.precioUnitario * ArrayListProducts[i].unidadesVendidos),
                 total:  await Redondear.redondearMonto((dataProduct.precioUnitario * ArrayListProducts[i].unidadesVendidos) - (ArrayListProducts[i].descuentoUnidad * ArrayListProducts[i].unidadesVendidos)),

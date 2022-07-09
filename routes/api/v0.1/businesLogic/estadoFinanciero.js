@@ -14,6 +14,15 @@ const { redondearPrecio } = require('../../../../Utils/RedondeNumeros/redondeoPr
 const Redonde = require("../../../../Utils/RedondeNumeros/redondeoPrecios");
 const Redondear = require("../../../../Utils/RedondeNumeros/redondearNumeros");
 
+const { redondearMonto } = require("../../../../Utils/RedondeNumeros/redondearNumeros");
+
+// liberia a mathjs
+const {create, all} = require('mathjs');
+
+const config={};
+const math = create(all, config);
+
+
 class EstadoFinanciero {
 
     static async createEstadoFinanciero(req, res, next) {
@@ -178,9 +187,13 @@ class EstadoFinanciero {
 
         let arrVentas = [], total = 0, sumEfectivoTotal = 0, sumCambio = 0;
         for (let i = 0; i < getListVentas.result.listVentas.length; i++) {
-            total = getListVentas.result.listVentas[i].precioTotal + total;
-            sumEfectivoTotal = (getListVentas.result.listVentas[i].pagoCliente * 1) + sumEfectivoTotal;
-            sumCambio = (getListVentas.result.listVentas[i].cambioCliente * 1) + sumCambio;
+            // var listVentasPrecioTotal =  getListVentas.result.listVentas[i].precioTotal;
+            var montoT = getListVentas.result.listVentas[i].precioTotal + total;
+            total = await Redondear.redondearMonto(montoT);
+
+            sumEfectivoTotal = await Redondear.redondearMonto((getListVentas.result.listVentas[i].pagoCliente * 1) + sumEfectivoTotal);
+            var sumCam = await (getListVentas.result.listVentas[i].cambioCliente * 1) + sumCambio;
+            sumCambio = await Redondear.redondearMonto(sumCam);
 
             const user = await getNameUser(getListVentas.result.listVentas[i].idUser);
             if (user.status == 'No fount') return res.status(206).json(user)
@@ -459,9 +472,16 @@ class EstadoFinanciero {
             }
             if (isUser == 'true') {
                 if (getListVentas.result.listVentas[i].idUser === idUser) {
-                    total = getListVentas.result.listVentas[i].precioTotal + total;
-                    sumEfectivoTotal = (getListVentas.result.listVentas[i].pagoCliente * 1) + sumEfectivoTotal;
-                    sumCambio = (getListVentas.result.listVentas[i].cambioCliente * 1) + sumCambio;
+                    // total = getListVentas.result.listVentas[i].precioTotal + total;
+                    var pt= (getListVentas.result.listVentas[i].precioTotal + total);
+                    total =await Redondear.redondearMonto(pt);
+
+                    var pagoCli = (getListVentas.result.listVentas[i].pagoCliente * 1) + sumEfectivoTotal;
+                    sumEfectivoTotal =await Redondear.redondearMonto(pagoCli);
+
+                    var sCamiio = (getListVentas.result.listVentas[i].cambioCliente * 1) + sumCambio;
+                    sumCambio = await Redondear.redondearMonto(sCamiio);
+
                     arrVentas.push({
                         _id: getListVentas.result.listVentas[i]._id,
                         idUser: `${user.resp.name} ${user.resp.lastName}`,
@@ -477,9 +497,15 @@ class EstadoFinanciero {
                     })
                 }
             } else {
-                total = getListVentas.result.listVentas[i].precioTotal + total;
-                sumEfectivoTotal = (getListVentas.result.listVentas[i].pagoCliente * 1) + sumEfectivoTotal;
-                sumCambio = (getListVentas.result.listVentas[i].cambioCliente * 1) + sumCambio;
+                var precioTot = getListVentas.result.listVentas[i].precioTotal + total;
+                total = await Redondear.redondearMonto(precioTot);
+
+                var sumEfTo = (getListVentas.result.listVentas[i].pagoCliente * 1) + sumEfectivoTotal;
+                sumEfectivoTotal = await Redondear.redondearMonto(sumEfTo);
+
+                var sCambio = await (getListVentas.result.listVentas[i].cambioCliente * 1) + sumCambio;
+                sumCambio = await Redondear.redondearMonto(sCambio);
+                
                 arrVentas.push({
                     _id: getListVentas.result.listVentas[i]._id,
                     idUser: `${user.resp.name} ${user.resp.lastName}`,
@@ -617,9 +643,10 @@ class EstadoFinanciero {
             const listProducts= await producto.find({idNegocio: idNegocio,state: true});
             var totalProducts= listProducts.length;
 
-            let TOTATL_INVERSION = await getTotalInversion(listProducts);
+            const TOTATL_INVERSION = await getTotalInversion(listProducts);
             const TOTAL_MONTO_ITENS_DISPONIBLES = await getTotalMontoPrecioUnidadesDisponibles(listProducts);
-            const TOTAL_GANANCIAS = await TOTAL_MONTO_ITENS_DISPONIBLES-TOTATL_INVERSION;
+            const total_ganancias = await math.subtract(TOTAL_MONTO_ITENS_DISPONIBLES,TOTATL_INVERSION);
+            const TOTAL_GANANCIAS =await Redondear.redondearMonto(total_ganancias);;
             const TOTAL_CANTIDAD_PRODUCTOS = await getTotalProducts(listProducts)
 
             res.status(200).send({
@@ -628,9 +655,9 @@ class EstadoFinanciero {
                 result:{
                     totalIntems: totalProducts,
                     totalProductosDisponibles: TOTAL_CANTIDAD_PRODUCTOS, 
-                    totalInversion: await Redonde.redondearPrecio(TOTATL_INVERSION),  
-                    totalMontoProductosDisponibles: await Redonde.redondearPrecio(TOTAL_MONTO_ITENS_DISPONIBLES),
-                    totalGanancias:await Redonde.redondearPrecio(TOTAL_GANANCIAS),
+                    totalInversion: TOTATL_INVERSION,  
+                    totalMontoProductosDisponibles: await Redondear.redondearMonto(TOTAL_MONTO_ITENS_DISPONIBLES),
+                    totalGanancias:await TOTAL_GANANCIAS,
                 }
             });
         } catch (error) {
@@ -646,16 +673,26 @@ class EstadoFinanciero {
 
     var totalInversion=0;
     for(var i = 0; i < LisProducts.length; i++) {
-        totalInversion= await totalInversion + ((LisProducts[i].precioCosto)*(LisProducts[i].unidadesDisponibles));
+        // totalInversion= await totalInversion + ((LisProducts[i].precioCosto)*(LisProducts[i].unidadesDisponibles));
+        var precioCosto = LisProducts[i].precioCosto;
+        var unidadesDisponibles = LisProducts[i].unidadesDisponibles;
+        var montoProduct = math.multiply(precioCosto,unidadesDisponibles);
+        totalInversion =await math.sum(totalInversion,montoProduct);
     }
-    return totalInversion;
+    var montoRednodeado = await Redondear.redondearMonto(totalInversion);
+    return montoRednodeado;
  }
 
  // total ventas = cantdad * precio
  async function getTotalMontoPrecioUnidadesDisponibles(Listproducts){
     var totalMoto=0;
     for(var i = 0; i < Listproducts.length; i++) {
-        totalMoto = await totalMoto + ((Listproducts[i].precioUnitario)*(Listproducts[i].unidadesDisponibles));
+        // totalMoto = await totalMoto + ((Listproducts[i].precioUnitario)*(Listproducts[i].unidadesDisponibles));
+        var precioUnitario = Listproducts[i].precioUnitario;
+        var unidadesDisponibles = Listproducts[i].unidadesDisponibles;
+        var monto =await math.multiply(precioUnitario,unidadesDisponibles)
+        totalMoto = await math.sum(totalMoto,monto);
+
     }
     return totalMoto;
  }
@@ -663,7 +700,9 @@ class EstadoFinanciero {
  async function getTotalProducts(Listproducts){
     var totalCantidadProducts=0;
     for(var i = 0; i < Listproducts.length; i++) {
-        totalCantidadProducts = await (totalCantidadProducts + Listproducts[i].unidadesDisponibles);
+        // totalCantidadProducts = await (totalCantidadProducts + Listproducts[i].unidadesDisponibles);
+        var unidadesDisponibles= Listproducts[i].unidadesDisponibles;
+        totalCantidadProducts = await math.sum(totalCantidadProducts,unidadesDisponibles);
     }
     return totalCantidadProducts;
  }

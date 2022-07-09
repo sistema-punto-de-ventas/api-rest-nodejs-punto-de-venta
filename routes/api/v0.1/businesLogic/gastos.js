@@ -4,6 +4,7 @@ const { user } = require('../../../../database/collection/models/user');
 const Utils = require('../../../../Utils/verifyCampos/verifyCampos');
 const { negocio } = require('../../../../database/collection/models/negocio');
 const { updateEstadoFinancieroGasto, getEstateFinanciero } = require('./estadoFinanciero');
+const Redondear = require('../../../../Utils/RedondeNumeros/redondearNumeros');
 
 class Gastos {
 
@@ -216,7 +217,7 @@ class Gastos {
             });
             let arr = [], gastoTotal=0;
             for (var i = 0; i < resp.length; i++) {
-                gastoTotal = resp[i].montoGasto + gastoTotal;
+                gastoTotal =await Redondear.redondearMonto(resp[i].montoGasto + gastoTotal);
                 const user = await validateUser(resp[i].idUser)
                 const nameTipoGasto = await validateIdTipoGasto(resp[i].idTipoGastos)
                 //console.log(nameTipoGasto)

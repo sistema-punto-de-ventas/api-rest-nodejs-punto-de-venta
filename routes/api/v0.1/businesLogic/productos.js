@@ -8,6 +8,8 @@ const { redondearPrecio } = require('../../../../Utils/RedondeNumeros/redondeoPr
 const { verificacionCamposRequeridos } = require('../../../../Utils/verifyCampos/verifyCampos');
 const Verify = require('../../../../Utils/verifyCampos/verifyCampos');
 const res = require('express/lib/response');
+const ManejoDesString = require('../../../../Utils/manejoDeString/manejoDeString');
+const VerificarNumerosPositivos = require('../../../../Utils/actulizarLosDatosAPositivos/verificarNumeroPositivo');
 
 
 class Products {
@@ -42,7 +44,7 @@ class Products {
                 idNegocio: idNegocio,
                 idUser: idUser,
                 nameTienda: dataTienda.nombre ? dataTienda.nombre : '',
-                nameProduct: nameProduct ? nameProduct : '',
+                nameProduct: nameProduct ? await ManejoDesString.toUperCaseFirstCharacter(nameProduct) : '',
                 category: category ? category : '',
                 subcategory: subcategory ? subcategory : '',
                 precioUnitario: precioUnitario ? precioUnitario : 0,
@@ -83,13 +85,13 @@ class Products {
         const product = await SchemaProducts.producto.findById({ _id: idProducto });
         if (!product) return res.status(206).json({ status: 'No fount', message: 'Ese producto no existe' });
         const updateDatas = await {
-            nameProduct: nameProduct || product.nameProduct,
+            nameProduct:  await ManejoDesString.toUperCaseFirstCharacter(nameProduct) || product.nameProduct,
             codigoProducto: codigoProducto|| product.codigoProducto,
             category: category || product.category,
             subcategory: subcategory || product.subcategory,
-            precioUnitario: precioUnitario || product.precioUnitario,
-            precioCosto: precioCosto || product.precioCosto,
-            unidadesDisponibles: unidadesDisponibles || product.unidadesDisponibles,
+            precioUnitario: await VerificarNumerosPositivos.verifyNumber(precioUnitario) || product.precioUnitario,
+            precioCosto: await VerificarNumerosPositivos.verifyNumber(precioCosto) || product.precioCosto,
+            unidadesDisponibles: await VerificarNumerosPositivos.verifyNumber(unidadesDisponibles) || product.unidadesDisponibles,
             description: description || product.description,
         }
         try {

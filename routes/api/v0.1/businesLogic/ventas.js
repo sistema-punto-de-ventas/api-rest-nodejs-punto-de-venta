@@ -79,6 +79,7 @@ class Ventas {
             res.status(400).send({ status: 'No fount', error: "error en el servidor", err });
         }
     }
+
     //listando ventas del usuario del dia
     static async getListVentasUser(req, res) {
         try {
@@ -90,7 +91,7 @@ class Ventas {
             const num = now.toString().split(' ')[2];
             const anio = now.toString().split(' ')[3];
 
-            const userName = await getNameUser(idUser);
+            const userName =    await getNameUser(idUser);
             if (userName.status == 'No fount') return res.status(404).json({
                 status: 'No fount', message: 'Ese usuario no existe'
             });
@@ -111,9 +112,9 @@ class Ventas {
             })
             let arr = [], err = false, total = 0, sumEfectivoTotal = 0, sumCambio = 0;
             for (let i = 0; i < filter.length; i++) {
-                total = filter[i].precioTotal + total;
-                sumEfectivoTotal = (filter[i].pagoCliente * 1) + sumEfectivoTotal;
-                sumCambio = (filter[i].cambioCliente * 1) + sumCambio;
+                total = await Redondear.redondearMonto(filter[i].precioTotal + total);
+                sumEfectivoTotal =await  Redondear.redondearMonto((filter[i].pagoCliente * 1) + sumEfectivoTotal);
+                sumCambio = await Redondear.redondearMonto((filter[i].cambioCliente * 1) + sumCambio);
 
                 const user = await getNameUser(filter[i].idUser);
                 if (user.status == 'No fount') return err = true;
@@ -203,9 +204,9 @@ class Ventas {
 
             let arr = [], err = false, total = 0, sumEfectivoTotal = 0, sumCambio = 0;
             for (let i = 0; i < ventas.length; i++) {
-                total = ventas[i].precioTotal + total;
-                sumEfectivoTotal = (ventas[i].pagoCliente * 1) + sumEfectivoTotal;
-                sumCambio = (ventas[i].cambioCliente * 1) + sumCambio;
+                total = await Redondear.redondearMonto(ventas[i].precioTotal + total);
+                sumEfectivoTotal =await Redondear.redondearMonto((ventas[i].pagoCliente * 1) + sumEfectivoTotal);
+                sumCambio =await  Redondear.redondearMonto((ventas[i].cambioCliente * 1) + sumCambio);
 
                 const user = await getNameUser(ventas[i].idUser);
                 if (user.status == 'No fount') return err = true;
@@ -260,6 +261,7 @@ class Ventas {
 
         const getVentaNegocio = await getVentasRange({ idNegocio, fechaInicio, fechaFinal });
         const getGastosNegocio = await getGastosRange({ idNegocio, fechaInicio, fechaFinal });
+        
 
         if (getVentaNegocio.status == 'No fount') return res.status(206).json(getVentaNegocio);
         if (getGastosNegocio.status == 'No fount') return res.status(206).json(getGastosNegocio);

@@ -21,15 +21,19 @@ const path =  require('path');
 
 // backups DB
 const backupDb = require('./database/collection/backupsDB/generateBackup');
-
+backupDb();
 
 const connect = require('./database/collection/connectionDB')
 
 const services = require('./routes/api/v0.1/services')
 const roles = require('./database/collection/setupConfigRoles/setupConfigRoles');
+const updateData = require('./Utils/actulizarLosDatosAPositivos/actualizarLosDatosApositivos');
 // const { consumers } = require('stream');
 
 roles()
+
+// actualizar los datos a positivos
+updateData()
 
 
 const PORT = process.env.PORT || 4000;
