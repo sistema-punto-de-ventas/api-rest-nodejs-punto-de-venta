@@ -657,7 +657,8 @@ class EstadoFinanciero {
                     totalProductosDisponibles: TOTAL_CANTIDAD_PRODUCTOS, 
                     totalInversion: TOTATL_INVERSION,  
                     totalMontoProductosDisponibles: await Redondear.redondearMonto(TOTAL_MONTO_ITENS_DISPONIBLES),
-                    totalGanancias:await TOTAL_GANANCIAS,
+                    totalGanancias:await TOTAL_GANANCIAS<0?TOTAL_GANANCIAS*(-1):TOTAL_GANANCIAS,
+                    porcentaje: await math.multiply(TOTATL_INVERSION,0.4)
                 }
             });
         } catch (error) {

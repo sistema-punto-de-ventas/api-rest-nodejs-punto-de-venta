@@ -40,6 +40,7 @@ const Ordenes = require('./businesLogic/ordenes')
 const PCategorias = require('./businesLogic/pCategoria');
 const NetworkConfig = require('../../../Utils/networkServices/networkConfig');
 const CallTickets = require('./businesLogic/callTickets');
+const Reporte = require('./businesLogic/reportes');
 
 route.get('/',(req, res, next)=>{
     res.status(200).send({"messagae":"Api-rest food sales system runing"})
@@ -245,6 +246,9 @@ route.put('/ordenes/updateOrdenCancelado/:idOrden', Ordenes.updateOrdenCancelado
 
 //para el cocinero 
 route.get('/ordenes/listOrdenMesaCocina/:idRestaurante',Ordenes.listOrdenMesaCocina)
+
+// REPORTES EN EXCEL
+route.get('/reports/list/all/prodcuts/:idNegocio', Reporte.listarProductos)
 
 
 module.exports = route;

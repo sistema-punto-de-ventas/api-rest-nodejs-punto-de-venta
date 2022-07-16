@@ -28,12 +28,13 @@ const connect = require('./database/collection/connectionDB')
 const services = require('./routes/api/v0.1/services')
 const roles = require('./database/collection/setupConfigRoles/setupConfigRoles');
 const updateData = require('./Utils/actulizarLosDatosAPositivos/actualizarLosDatosApositivos');
+const Reporte = require('./routes/api/v0.1/businesLogic/reportes');
 // const { consumers } = require('stream');
 
 roles()
 
 // actualizar los datos a positivos
-updateData()
+// updateData()
 
 
 const PORT = process.env.PORT || 4000;
@@ -55,6 +56,8 @@ app.use('/',services)
 // Environment for production
 app.use("/api/v0.1", services);
 
+// test reportes
+// Reporte.listarProductos();
 
 // configuracion de socketio
 const server = http.createServer(app)
