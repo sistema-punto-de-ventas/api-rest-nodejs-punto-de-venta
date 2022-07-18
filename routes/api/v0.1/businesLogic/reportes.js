@@ -51,7 +51,7 @@ class Reporte{
     
             var linkFile={
                 reports:'NotasStudents',
-                linkFile: `http://localhost:4000/reports/${name}.xlsx`,
+                linkFile: `https://api-puntodeventas.herokuapp.com/reports/${name}.xlsx`,
             }
             res.status(200).send(linkFile)
         }catch(e){
