@@ -5,6 +5,7 @@ const types = {
     addNewProduct:'[product] addNewProduct',
     changeStateTickets:'[ventas] changeStateTickets',
     nuevaVenta: '[ventas] nuevaVenta',
+    reporteVentaYGastos: '[ventasGastos] reporte'
 }
 
 

@@ -101,7 +101,7 @@ class PCategoria{
             const verifyIdPcatigoria = await validateIdPcategoria(idPcategoria);
             if(verifyIdPcatigoria.status == 'No fount') return res.status(206).json(verifyIdPcatigoria);
 
-            const verifyNameSubcategoria = await validateNameSubCategoria(nombre);
+            const verifyNameSubcategoria = await validateNameSubCategoria(idPcategoria, nombre);
             if(verifyNameSubcategoria.status == 'No fount') return res.status(206).json(verifyNameSubcategoria)
             
             var newSubCatergoria = new pCategoriaSchema.pSubcategoria({
@@ -133,7 +133,7 @@ class PCategoria{
             const verifyIdSubcategoria = await validateIdSubCategoria(idPsubcategoria);
             if(verifyIdSubcategoria.status == 'No fount') return res.status(206).json(verifyIdSubcategoria)
 
-            const verifyNameSubcategoria = await validateNameSubCategoria(nombre);
+            const verifyNameSubcategoria = await veryNombreSubcategoriaForUpdate(nombre);
             if(verifyNameSubcategoria.status == 'No fount') return res.status(206).json(verifyNameSubcategoria)
 
             var result = await pCategoriaSchema.pSubcategoria.findByIdAndUpdate({_id: idPsubcategoria}, {nombre: nombre});
@@ -180,8 +180,10 @@ const validateNombre = async(nombre)=>{
 }
 const validateIdPcategoria = async (idPcategoria) => {
     try {
-        const resp = await pCategoriaSchema.pCategoria.findById({ _id:idPcategoria });
+        const resp = await pCategoriaSchema.pCategoria.findById({ _id:idPcategoria }).populate("subcategorias");
         if (!resp) return { status: 'No fount', message: 'Categoria no valida' };
+    
+        console.log(resp)
         return { status: 'ok', message:'Existe' }
     } catch (error) {
         console.log(error);
@@ -190,10 +192,27 @@ const validateIdPcategoria = async (idPcategoria) => {
 }
 
 //validar nombre de la sub categoria
-const validateNameSubCategoria = async (nombre)=>{
+const validateNameSubCategoria = async (idPcategoria, nombre)=>{
     try {
-        const resp = await pCategoriaSchema.pSubcategoria.findOne({ nombre });
-        if (resp) return { status: 'No fount', message: 'Nombre ya registrado' };
+        const resp = await pCategoriaSchema.pCategoria.findById({ _id:idPcategoria }).populate("subcategorias");
+        var existName=0;
+        resp.subcategorias.map((d,i)=>{
+            if(d.nombre===nombre){
+                existName = existName+1;
+            }
+        })
+        if (existName>0) return { status: 'No fount', message: 'Nombre ya registrado' };
+        if (existName===0)return { status: 'ok', message:'No existe' }
+    } catch (error) {
+        console.log(error);
+        return {status: 'No fount', message: 'Error 400' }
+    }
+}
+
+const veryNombreSubcategoriaForUpdate = async (idPcategoria, nombre)=>{
+    try {
+        const resp = await pCategoriaSchema.pSubcategoria.find({ nombre:nombre });
+        if (!resp) return { status: 'No fount', message: 'Nombre ya registrado' };
         return { status: 'ok', message:'No existe' }
     } catch (error) {
         console.log(error);

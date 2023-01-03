@@ -95,6 +95,7 @@ class UtilsVentas {
             var nVenta = await VentaSchema.Venta.findOne({ _id: resultVenta._id }).populate('products');
             return res.status(200).send({ status: "ok", message: `Venta creada con exito`, result: nVenta })
             
+            
         } catch (error) {
             console.log('error en utilsVentas\n', error);
             return res.status(400).send({ status: 'No fount', error: "error", message: `Error al crear la venta` })

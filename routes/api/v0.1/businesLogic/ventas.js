@@ -274,6 +274,7 @@ class Ventas {
 
         const productCategory = await getCategoriProduct(getVentaNegocio.product,nameCategori);
 
+       
         return res.status(200).json({
             status: 'ok',
             message: 'Reporte de ventas y gastos',

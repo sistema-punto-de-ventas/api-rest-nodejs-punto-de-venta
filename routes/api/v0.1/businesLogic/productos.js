@@ -35,9 +35,12 @@ class Products {
             if (!verifyUser) return res.status(206).send({ status: 'No fount', message: 'Id negocio no existe' });
 
             const dataTienda = await SchemaNegocio.negocio.findById({ _id: idNegocio });
-            const dataProduct = await SchemaProducts.producto.findOne({ nameProduct });
+            const dataProduct = await SchemaProducts.producto.findOne({ nameProduct:nameProduct });
+            var namePro = await ManejoDesString.toUperCaseFirstCharacter(nameProduct);
+            const dataProduct2 = await SchemaProducts.producto.findOne({ nameProduct:namePro });
+
             if (!dataTienda) return res.status(206).send({ status: 'No fount', message: 'Id negocio no existe' })
-            if (dataProduct) return res.status(206).send({ status: 'No fount', message: 'El nombre del producto ya fue registrado' })
+            if (dataProduct || dataProduct2) return res.status(206).send({ status: 'No fount', message: 'El nombre del producto ya fue registrado' })
 
             var newProduct = new SchemaProducts.producto({
 

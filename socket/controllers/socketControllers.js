@@ -22,6 +22,16 @@ const socketControllers = ( action, data={} ) =>{
             io.emit(types.changeStateTickets, data);
             break;
         }
+        
+        case types.reporteVentaYGastos: {
+            console.log('[ventasGastos] reporte');
+            io.emit(types.reporteVentaYGastos, data)
+            break;
+        }
+        // case types.nuevaVenta:{
+        //     io.emit(types.)
+        // }
+        
 
         default:{
             console.log('no se encontro el tipo de accion')

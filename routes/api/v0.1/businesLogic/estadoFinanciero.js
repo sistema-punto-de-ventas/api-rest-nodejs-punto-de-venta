@@ -18,6 +18,7 @@ const { redondearMonto } = require("../../../../Utils/RedondeNumeros/redondearNu
 
 // liberia a mathjs
 const {create, all} = require('mathjs');
+const socketControllers = require("../../../../socket/controllers/socketControllers");
 
 const config={};
 const math = create(all, config);
@@ -268,6 +269,11 @@ class EstadoFinanciero {
         const paginationVentas = await paginationListVentas({ arrVentas: arrVentas, pagenumber: pgnV, pagesize: pgsV, buscador: buscadorV });
         const paginationGastos = await paginationListGastos({ arrGastos: arr, pagenumber: pgnG, pagesize: pgsG, buscador: buscadorG });
 
+           try {
+                socketControllers('[ventasGastos] reporte', 'data');
+            } catch (error) {
+                console.log('error socket')
+            }
         return res.status(200).json({
             status: 'ok',
             message: 'Estado financiero activo',

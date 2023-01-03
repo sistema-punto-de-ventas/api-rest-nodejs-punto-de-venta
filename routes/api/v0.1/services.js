@@ -67,8 +67,8 @@ route.get('/socket/name=:name',(req, res, next)=>{
     // console.log(Object.keys(io.defalut.sockets))
     
     socketControllers('[user] addNewUser',users);
-    
-    res.status(200).send({'lista de usuarios':users})
+    socketControllers('[ventas] changeStateTickets',resultVentaUpdate);
+    res.status(200).send({'lista de usuarios':users})   
 })
 
 // end point for test how use middleware and access role control
@@ -249,6 +249,7 @@ route.get('/ordenes/listOrdenMesaCocina/:idRestaurante',Ordenes.listOrdenMesaCoc
 
 // REPORTES EN EXCEL
 route.get('/reports/list/all/prodcuts/:idNegocio', Reporte.listarProductos)
+route.get('/reports/list/estadosfinancieros/', Reporte.listaDeEstadosFinancieros)
 
 
 module.exports = route;

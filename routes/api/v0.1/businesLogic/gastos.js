@@ -5,6 +5,7 @@ const Utils = require('../../../../Utils/verifyCampos/verifyCampos');
 const { negocio } = require('../../../../database/collection/models/negocio');
 const { updateEstadoFinancieroGasto, getEstateFinanciero } = require('./estadoFinanciero');
 const Redondear = require('../../../../Utils/RedondeNumeros/redondearNumeros');
+const socketControllers = require('../../../../socket/controllers/socketControllers');
 
 class Gastos {
 
@@ -185,7 +186,17 @@ class Gastos {
         try {
             const resp = await newUserGasto.save();
             console.log(resp)
+
+
             await updateEstadoFinancieroGasto(idNegocio, resp._id, "gasto");
+
+
+            
+            try {
+                socketControllers('[ventasGastos] reporte', {data:'sin data'});
+            } catch (error) {
+                console.log('error socket')
+            }
 
             return res.status(200).json({
                 status: 'ok',
