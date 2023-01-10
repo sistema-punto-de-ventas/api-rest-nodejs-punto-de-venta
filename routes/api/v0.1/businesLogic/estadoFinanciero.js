@@ -17,7 +17,7 @@ const Redondear = require("../../../../Utils/RedondeNumeros/redondearNumeros");
 const { redondearMonto } = require("../../../../Utils/RedondeNumeros/redondearNumeros");
 
 // liberia a mathjs
-const {create, all} = require('mathjs');
+const {create, all, prod} = require('mathjs');
 const socketControllers = require("../../../../socket/controllers/socketControllers");
 
 const config={};
@@ -341,6 +341,7 @@ class EstadoFinanciero {
         let sumTotal = 0;
         for (let i = 0; i < productos.length; i++) {
             let pr = await productos[i].populate('products');
+            // console.log(pr)
             for (let j = 0; j < pr.products.length; j++) {
                 if (pr.products[j].category === nameCategori) {
                     sumTotal = pr.products[j].total + sumTotal;
@@ -351,21 +352,43 @@ class EstadoFinanciero {
                         detalleVenta: pr.products[j].detalleVenta,
                         category: pr.products[j].category,
                         precioUnitario: pr.products[j].precioUnitario,
-                        cantidad: 0,
-                        total: 0,
+                        cantidad: pr.products[j].unidadesVendidos,
+                        total: pr.products[j].total,
                     });
                 }
 
             }
         }
         let obj = {}
+        let listProductResume = [];
         for (let d = 0; d < arr.length; d++) {
-            let product = obj[arr[d].idProduct];
-            if (!product) {
-                product = obj[arr[d].idProduct] = arr[d];
+            // let product = obj[arr[d].idProduct];
+            // if (!product) {
+            //     product = obj[arr[d].idProduct] = arr[d];
+            // }
+            // product.cantidad++
+            // product.total = product.cantidad * product.precioUnitario
+            if((listProductResume.filter(producto=>producto.idProduct===arr[d].idProduct)).length===0){
+                listProductResume.push(arr[d])
+                arr[d]={}
+
             }
-            product.cantidad++
-            product.total = product.cantidad * product.precioUnitario
+            if((listProductResume.filter(producto=>producto.idProduct===arr[d].idProduct)).length===1){
+                for(var f =0;f<listProductResume.length;f++){
+                    var cantidad =0; var total = 0;
+                    // console.table(listProductResume[f].cantidad , arr[d].cantidad)
+                    if(listProductResume[f].idProduct === arr[d].idProduct){
+                        cantidad =await  listProductResume[f].cantidad + arr[d].cantidad;
+                        total =await listProductResume[f].total + arr[d].total; 
+                        listProductResume[f].cantidad = cantidad;
+                        listProductResume[f].total = total;  
+                    }
+
+                }
+                // listProductResume.push(arr[d])
+
+            }
+            
         }
         let newArr = [];
         for (const id in obj) {
@@ -377,7 +400,7 @@ class EstadoFinanciero {
             result: {
                 sumTotal,
                 length: arr.length,
-                filterData: newArr
+                filterData: listProductResume
             }
         })
 

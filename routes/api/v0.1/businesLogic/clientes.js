@@ -141,19 +141,19 @@ class Clientes {
 
     static async searchCliente(req, res) {
         const { buscador } = req.body;
+        // console.log(buscador);
         const cliente = await filterCliente(buscador);
         if (cliente.status === 'No fount') return res.status(206).json(cliente);
 
         var pageNumber = 0;
         var pageSize = 2;
         let pag = cliente.result?.slice(pageNumber * pageSize, (pageNumber + 1) * pageSize);
-
+        
         return res.status(200).json({
             status: 'ok',
             message: 'lista clientes',
             result: pag
         })
-
     }
     static async nameCLiente(req, res) {
         const { idCliente } = req.params;
@@ -213,7 +213,8 @@ async function filterCliente(buscador) {
         const filter = await resp.filter((data) => {
             return data.ci?.includes(buscador)
         })
-
+        // console.log(buscador);
+        // console.log(filter)
         return { status: 'ok', message: 'Clientes encontrados', result: filter }
 
     } catch (error) {
